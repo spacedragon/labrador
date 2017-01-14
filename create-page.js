@@ -32,6 +32,21 @@ function buildListItem(list: Array<$DataMap>, item: $DataMap): $DataMap {
   return item;
 }
 
+function toJS(obj) {
+  if (typeof obj !== 'object') {
+    return obj
+  }
+  if(obj.toJS) {
+    return obj.toJS()
+  }else {
+    let result = {}
+    for(let prop in obj) {
+       result[prop] = toJS(obj[prop])
+    }
+    return result;
+  } 
+}
+
 module.exports = function createPage(ComponentClass: Class<Component>) {
   let config = {};
   let page: $Page;
@@ -44,7 +59,7 @@ module.exports = function createPage(ComponentClass: Class<Component>) {
     let path = event.currentTarget.dataset.path || '';
     // $Flow
     let handler = event.currentTarget.dataset['bind' + event.type] || event.currentTarget.dataset['catch' + event.type];
-    while (path) {
+    while(path) {
       let index = path.indexOf('.');
       let key = '';
       if (index === -1) {
@@ -54,7 +69,7 @@ module.exports = function createPage(ComponentClass: Class<Component>) {
         key = path.substr(0, index);
         path = path.substr(index + 1);
       }
-      
+
       com = com._children[key];
       if (!com) {
         console.error('Can not resolve component by path ' + event.currentTarget.dataset.path);
@@ -99,8 +114,8 @@ module.exports = function createPage(ComponentClass: Class<Component>) {
           let list = _get(data, path); //原有data中列表数据
           let newList = dataMap.map((item) => buildListItem(list, item));
           _set(data, path, newList);
-        } else {
-          _set(data, path.split('.'), dataMap);
+        } else {   // to support mobx computed values
+          _set(data, path.split('.'), toJS(dataMap));
         }
       });
 

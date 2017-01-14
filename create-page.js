@@ -54,11 +54,8 @@ module.exports = function createPage(ComponentClass: Class<Component>) {
         key = path.substr(0, index);
         path = path.substr(index + 1);
       }
-      if (Array.isArray(com)) {
-        com = com[parseInt(key)];
-      } else {
-        com = com._children[key];
-      }
+      
+      com = com._children[key];
       if (!com) {
         console.error('Can not resolve component by path ' + event.currentTarget.dataset.path);
         return undefined;
